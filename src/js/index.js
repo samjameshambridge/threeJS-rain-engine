@@ -4,7 +4,7 @@ import Application from "./app.js";
   var application;
 
   function init() {
-    var numberOfClouds = 75;
+    var numberOfClouds = 25;
     var rainCount = 15000;
 
     application = new Application({ numberOfClouds, rainCount });

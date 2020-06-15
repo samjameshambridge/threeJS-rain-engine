@@ -22,6 +22,7 @@ export default class Application {
     this.numberOfClouds = numberOfClouds;
     this.rainCount = rainCount;
     this.rainGeometry = null;
+    this.rain = null;
     this.renderer = null;
   }
 
@@ -42,6 +43,8 @@ export default class Application {
     this.initRain();
 
     this.setRenderer();
+
+    this.initFog();
 
     this.initLoader();
 
@@ -68,6 +71,12 @@ export default class Application {
     this.lightningFlash.position.set(200, 300, 100);
 
     this.scene.add(this.lightningFlash);
+  }
+
+  initFog() {
+    this.scene.fog = new THREE.FogExp2(0x1c1c2a, 0.001);
+
+    this.renderer.setClearColor(this.scene.fog.color);
   }
 
   setRenderer() {
@@ -106,9 +115,9 @@ export default class Application {
       transparent: true,
     });
 
-    var rain = new THREE.Points(this.rainGeometry, rainMaterial);
+    this.rain = new THREE.Points(this.rainGeometry, rainMaterial);
 
-    this.scene.add(rain);
+    this.scene.add(this.rain);
   }
 
   loadClouds() {
@@ -184,6 +193,8 @@ export default class Application {
     }
 
     this.rainGeometry.verticesNeedUpdate = true;
+
+    this.rain.rotation.y += 0.002;
   }
 
   animate() {
