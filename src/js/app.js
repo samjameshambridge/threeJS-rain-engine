@@ -130,6 +130,7 @@ export default class Application {
       map: texture,
       transparent: true,
     });
+
     var cloud;
 
     for (let i = 0; i < this.numberOfClouds; i++) {
