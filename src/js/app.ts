@@ -1,6 +1,20 @@
 import * as THREE from "three";
+import { RainDrops } from "./interfaces";
 
 export default class Application {
+  animate_binded: FrameRequestCallback;
+  camera: THREE.PerspectiveCamera;
+  cloudParticles: THREE.Mesh[];
+  lightningFlash: THREE.PointLight;
+  loader: THREE.TextureLoader;
+  numberOfClouds: number;
+  rainCount: number;
+  rain: THREE.Points;
+  rainDrops: RainDrops[];
+  rainGeometry: THREE.Geometry;
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+
   constructor({ numberOfClouds, rainCount }) {
     this.scene = new THREE.Scene();
 
@@ -17,13 +31,9 @@ export default class Application {
 
     this.animate_binded = this.animate.bind(this);
     this.cloudParticles = [];
-    this.lightningFlash = null;
-    this.loader = null;
     this.numberOfClouds = numberOfClouds;
     this.rainCount = rainCount;
-    this.rainGeometry = null;
-    this.rain = null;
-    this.renderer = null;
+    this.rainDrops = [];
   }
 
   positionCamera() {
@@ -94,19 +104,19 @@ export default class Application {
   initRain() {
     this.rainGeometry = new THREE.Geometry();
 
-    var rainDrop;
-
     for (var i = 0; i < this.rainCount; i++) {
-      rainDrop = new THREE.Vector3(
-        Math.random() * 400 - 200,
-        Math.random() * 500 - 250,
-        Math.random() * 400 - 200
-      );
+      let rainDrop = {
+        vertice: new THREE.Vector3(
+          Math.random() * 400 - 200,
+          Math.random() * 500 - 250,
+          Math.random() * 400 - 200
+        ),
+        velocity: 0,
+      };
 
-      rainDrop.velocity = {};
-      rainDrop.velocity = 0;
+      this.rainGeometry.vertices.push(rainDrop.vertice);
 
-      this.rainGeometry.vertices.push(rainDrop);
+      this.rainDrops.push(rainDrop);
     }
 
     var rainMaterial = new THREE.PointsMaterial({
@@ -124,17 +134,15 @@ export default class Application {
     this.loader.load("./img/smoke.png", this.onCloudLoad.bind(this));
   }
 
-  onCloudLoad(texture) {
+  onCloudLoad(texture: THREE.Texture) {
     var cloudGeometry = new THREE.PlaneBufferGeometry(500, 500);
     var cloudMaterial = new THREE.MeshLambertMaterial({
       map: texture,
       transparent: true,
     });
 
-    var cloud;
-
     for (let i = 0; i < this.numberOfClouds; i++) {
-      cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+      let cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
 
       this.setCloudPosition(cloud);
 
@@ -147,10 +155,10 @@ export default class Application {
       this.cloudParticles.push(cloud);
     }
 
-    this.animate_binded();
+    this.animate();
   }
 
-  setCloudPosition(cloud) {
+  setCloudPosition(cloud: THREE.Mesh) {
     var xRandom = Math.random() * 800 - 400;
     var zRandom = Math.random() * 500 - 450;
     var y = 500;
@@ -158,7 +166,7 @@ export default class Application {
     cloud.position.set(xRandom, y, zRandom);
   }
 
-  setCloudRotation(cloud) {
+  setCloudRotation(cloud: THREE.Mesh) {
     cloud.rotation.x = 1.16;
     cloud.rotation.y = -0.12;
     cloud.rotation.z = Math.random() * 360;
@@ -179,17 +187,15 @@ export default class Application {
   }
 
   animateRaindrops() {
-    var vertice;
+    for (var i = 0; i < this.rainDrops.length; i++) {
+      let raindrop = this.rainDrops[i];
 
-    for (var i = 0; i < this.rainGeometry.vertices.length; i++) {
-      vertice = this.rainGeometry.vertices[i];
+      raindrop.velocity -= 0.01 + Math.random() * 0.1;
+      raindrop.vertice.y += raindrop.velocity;
 
-      vertice.velocity -= 0.01 + Math.random() * 0.1;
-      vertice.y += vertice.velocity;
-
-      if (vertice.y < -200) {
-        vertice.y = 200;
-        vertice.velocity = 0;
+      if (raindrop.vertice.y < -200) {
+        raindrop.vertice.y = 200;
+        raindrop.velocity = 0;
       }
     }
 
@@ -199,10 +205,8 @@ export default class Application {
   }
 
   animate() {
-    var cloudParticle;
-
     for (var i = 0; i < this.cloudParticles.length; i++) {
-      cloudParticle = this.cloudParticles[i];
+      let cloudParticle = this.cloudParticles[i];
 
       cloudParticle.rotation.z -= 0.002;
     }
