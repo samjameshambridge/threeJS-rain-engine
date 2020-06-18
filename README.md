@@ -6,6 +6,6 @@ Inspired by and developed from: https://redstapler.co/three-js-realistic-rain-tu
 
 ## Scripts
 
-To start, serve dist/index.html on a local server
+To start, serve dist/index.html on a local server.
 
-To build: "npm run build"
+To build: "npm run build".
